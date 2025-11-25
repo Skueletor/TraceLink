@@ -1,0 +1,130 @@
+<div class="p-6 space-y-6">
+  <div class="flex justify-between items-center">
+    <h1 class="text-3xl font-bold text-gray-800">Trabajadores Registrados</h1>
+    <button (click)="openCreateModal()"
+            class="bg-blue-600 text-white px-6 py-3 rounded-lg font-semibold hover:bg-blue-700 transition-colors flex items-center">
+      <span class="mr-2">➕</span> Agregar Trabajador
+    </button>
+  </div>
+
+  <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+    <div *ngFor="let worker of workers" class="bg-white rounded-lg shadow-md overflow-hidden">
+      <div class="bg-gradient-to-r from-blue-500 to-blue-600 p-4">
+        <div class="flex items-center">
+          <div class="bg-white bg-opacity-20 p-3 rounded-full mr-3">
+            <span class="text-white text-3xl">👤</span>
+          </div>
+          <div>
+            <h3 class="text-white font-bold text-lg">{{ worker.name }}</h3>
+            <p class="text-blue-100 text-sm">{{ worker.code }}</p>
+          </div>
+        </div>
+      </div>
+      
+      <div class="p-4 space-y-3">
+        <div>
+          <p class="text-xs text-gray-500">Rol</p>
+          <p class="text-sm font-semibold text-gray-700">{{ worker.role }}</p>
+        </div>
+        <div>
+          <p class="text-xs text-gray-500">Área Asignada</p>
+          <p class="text-sm font-semibold text-gray-700">{{ worker.area }}</p>
+        </div>
+        <div>
+          <p class="text-xs text-gray-500">Herramientas en Uso</p>
+          <div *ngIf="getAssignedTools(worker.id).length === 0">
+            <p class="text-sm text-gray-400 italic">Sin herramientas asignadas</p>
+          </div>
+          <div *ngIf="getAssignedTools(worker.id).length > 0" class="mt-2 space-y-1">
+            <div *ngFor="let tool of getAssignedTools(worker.id)" 
+                 class="text-xs bg-blue-50 px-2 py-1 rounded flex items-center">
+              <span class="mr-1">🔧</span> {{ tool.name }}
+            </div>
+          </div>
+        </div>
+        
+        <div class="pt-2">
+          <span [class.bg-orange-100]="getAssignedTools(worker.id).length > 0"
+                [class.text-orange-700]="getAssignedTools(worker.id).length > 0"
+                [class.bg-green-100]="getAssignedTools(worker.id).length === 0"
+                [class.text-green-700]="getAssignedTools(worker.id).length === 0"
+                class="inline-block px-3 py-1 rounded-full text-xs font-semibold">
+            {{ getAssignedTools(worker.id).length > 0 ? 'Con herramientas' : 'Disponible' }}
+          </span>
+        </div>
+
+        <div class="flex gap-2 pt-2">
+          <button (click)="openEditModal(worker)"
+                  class="flex-1 bg-yellow-500 text-white px-4 py-2 rounded hover:bg-yellow-600 transition-colors text-sm font-semibold">
+            ✏️ Editar
+          </button>
+          <button (click)="deleteWorker(worker.id)"
+                  class="flex-1 bg-red-500 text-white px-4 py-2 rounded hover:bg-red-600 transition-colors text-sm font-semibold">
+            🗑️ Eliminar
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Modal de Crear/Editar -->
+<div *ngIf="showModal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+  <div class="bg-white rounded-lg shadow-2xl p-6 max-w-md w-full mx-4">
+    <h2 class="text-2xl font-bold text-gray-800 mb-4">
+      {{ isEditMode ? 'Editar' : 'Agregar' }} Trabajador
+    </h2>
+
+    <div class="space-y-4">
+      <div>
+        <label class="block text-sm font-semibold text-gray-700 mb-1">Nombre Completo</label>
+        <input type="text" [(ngModel)]="currentWorker.name" 
+               class="w-full px-4 py-2 border-2 border-gray-300 rounded-lg focus:border-blue-500 focus:outline-none"
+               placeholder="Ej: Juan Pérez">
+      </div>
+
+      <div>
+        <label class="block text-sm font-semibold text-gray-700 mb-1">Código</label>
+        <input type="text" [(ngModel)]="currentWorker.code" 
+               class="w-full px-4 py-2 border-2 border-gray-300 rounded-lg focus:border-blue-500 focus:outline-none"
+               placeholder="Ej: EMP-001">
+      </div>
+
+      <div>
+        <label class="block text-sm font-semibold text-gray-700 mb-1">Rol</label>
+        <select [(ngModel)]="currentWorker.role" 
+                class="w-full px-4 py-2 border-2 border-gray-300 rounded-lg focus:border-blue-500 focus:outline-none">
+          <option value="">Seleccionar rol</option>
+          <option value="Técnico">Técnico</option>
+          <option value="Supervisor">Supervisor</option>
+          <option value="Operario">Operario</option>
+          <option value="Almacenista">Almacenista</option>
+          <option value="Ingeniero">Ingeniero</option>
+        </select>
+      </div>
+
+      <div>
+        <label class="block text-sm font-semibold text-gray-700 mb-1">Área</label>
+        <select [(ngModel)]="currentWorker.area" 
+                class="w-full px-4 py-2 border-2 border-gray-300 rounded-lg focus:border-blue-500 focus:outline-none">
+          <option value="">Seleccionar área</option>
+          <option value="Producción">Producción</option>
+          <option value="Mantenimiento">Mantenimiento</option>
+          <option value="Almacén">Almacén</option>
+          <option value="Administración">Administración</option>
+        </select>
+      </div>
+    </div>
+
+    <div class="flex gap-3 mt-6">
+      <button (click)="closeModal()"
+              class="flex-1 px-4 py-3 bg-gray-200 text-gray-700 rounded-lg font-semibold hover:bg-gray-300 transition-colors">
+        Cancelar
+      </button>
+      <button (click)="saveWorker()"
+              class="flex-1 px-4 py-3 bg-blue-600 text-white rounded-lg font-semibold hover:bg-blue-700 transition-colors">
+        {{ isEditMode ? 'Actualizar' : 'Crear' }}
+      </button>
+    </div>
+  </div>
+</div>

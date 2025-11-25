@@ -1,0 +1,26 @@
+<nav class="bg-gradient-to-r from-blue-600 to-blue-800 text-white shadow-lg">
+  <div class="container mx-auto px-4">
+    <div class="flex items-center justify-between h-16">
+      <!-- Logo -->
+      <div class="flex items-center space-x-3">
+        <div class="text-3xl">🏢</div>
+        <div>
+          <h1 class="text-xl font-bold">TraceLink</h1>
+          <p class="text-xs text-blue-200">Sistema de Rastreo Inteligente</p>
+        </div>
+      </div>
+
+      <!-- Menu Items -->
+      <div class="flex space-x-1">
+        <a 
+          *ngFor="let item of menuItems" 
+          [routerLink]="item.path" 
+          routerLinkActive="bg-white text-blue-600 shadow-md" 
+          class="flex items-center space-x-2 px-4 py-2 rounded-lg transition-all text-blue-100 hover:bg-blue-700">
+          <span class="text-lg">{{ item.icon }}</span>
+          <span class="text-sm font-medium">{{ item.label }}</span>
+        </a>
+      </div>
+    </div>
+  </div>
+</nav>
