@@ -55,24 +55,74 @@ export class ToolsComponent implements OnInit {
   }
 
   saveTool() {
+    // Validaciones básicas
+    if (!this.currentTool.name || !this.currentTool.code || !this.currentTool.category || !this.currentTool.max_time) {
+      alert('Por favor completa todos los campos obligatorios');
+      return;
+    }
+
+    console.log('Guardando herramienta (modo edición:', this.isEditMode, '):', this.currentTool);
+
+    // Preparar datos para enviar - asegurar que max_time esté presente
+    const toolData = {
+      name: this.currentTool.name,
+      code: this.currentTool.code,
+      category: this.currentTool.category,
+      max_time: this.currentTool.max_time
+    };
+
+    console.log('Datos a enviar:', toolData);
+
     if (this.isEditMode && this.currentTool.id) {
-      this.toolService.updateTool(this.currentTool.id, this.currentTool).subscribe(() => {
-        this.loadData();
-        this.closeModal();
+      this.toolService.updateTool(this.currentTool.id, toolData).subscribe({
+        next: (result) => {
+          console.log('Herramienta actualizada exitosamente:', result);
+          alert('Herramienta actualizada correctamente');
+          this.loadData();
+          this.closeModal();
+        },
+        error: (error) => {
+          console.error('Error actualizando herramienta:', error);
+          const errorMessage = error.error?.error || error.message || 'Error desconocido';
+          alert('Error actualizando la herramienta: ' + errorMessage);
+        }
       });
     } else {
-      this.toolService.createTool(this.currentTool).subscribe(() => {
-        this.loadData();
-        this.closeModal();
+      this.toolService.createTool(toolData).subscribe({
+        next: (result) => {
+          console.log('Herramienta creada exitosamente:', result);
+          alert('Herramienta creada correctamente');
+          this.loadData();
+          this.closeModal();
+        },
+        error: (error) => {
+          console.error('Error creando herramienta:', error);
+          const errorMessage = error.error?.error || error.message || 'Error desconocido';
+          alert('Error creando la herramienta: ' + errorMessage);
+        }
       });
     }
   }
 
   deleteTool(id: number) {
     if (confirm('¿Estás seguro de eliminar esta herramienta?')) {
-      this.toolService.deleteTool(id).subscribe(() => {
-        this.loadData();
+      this.toolService.deleteTool(id).subscribe({
+        next: () => {
+          console.log('Herramienta eliminada exitosamente');
+          this.loadData();
+        },
+        error: (error) => {
+          console.error('Error eliminando herramienta:', error);
+          alert('Error eliminando la herramienta: ' + (error.error?.error || error.message));
+        }
       });
     }
+  }
+
+  isFormValid(): boolean {
+    return !!(this.currentTool.name && 
+              this.currentTool.code && 
+              this.currentTool.category && 
+              this.currentTool.max_time);
   }
 }

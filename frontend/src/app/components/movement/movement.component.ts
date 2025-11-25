@@ -21,6 +21,7 @@ export class MovementComponent implements OnInit {
   showWorkerModal = false;
   selectedWorker: Worker | null = null;
   toBuildingIdPending: number | null = null;
+  workerActiveTools: Map<number, any> = new Map(); // Mapear ID trabajador -> herramienta activa
 
   constructor(
     private buildingService: BuildingService,
@@ -48,7 +49,26 @@ export class MovementComponent implements OnInit {
 
     this.workerService.getAllWorkers().subscribe(data => {
       this.workers = data;
-      console.log('👥 Trabajadores cargados:', data);
+      console.log('� Trabajadores cargados:', data);
+      
+      // Cargar información de herramientas activas para cada trabajador
+      this.loadWorkerActiveTools();
+    });
+  }
+
+  loadWorkerActiveTools() {
+    this.workerActiveTools.clear();
+    this.workers.forEach(worker => {
+      this.movementService.getWorkerActiveTool(worker.id).subscribe({
+        next: (response) => {
+          if (response.activeTool) {
+            this.workerActiveTools.set(worker.id, response.activeTool);
+          }
+        },
+        error: (error) => {
+          console.error(`Error cargando herramienta activa para ${worker.name}:`, error);
+        }
+      });
     });
   }
 
@@ -133,13 +153,15 @@ export class MovementComponent implements OnInit {
       worker: this.selectedWorker?.name
     });
 
+    // Obtener usuario logueado para incluir en la descripción
+    const userName = localStorage.getItem('user_name') || 'Usuario';
     const movement = {
       tool_id: this.selectedTool.id,
       worker_id: this.selectedWorker?.id || null,
       from_building_id: this.selectedFromBuilding,
       to_building_id: toBuildingId,
       movement_type: 'transfer',
-      action_description: `Movimiento de ${this.selectedTool.name} de edificio ${this.selectedFromBuilding} a ${toBuildingId}`
+      action_description: `${userName} movió ${this.selectedTool.name} del edificio ${this.selectedFromBuilding} al ${toBuildingId}`
     };
 
     this.movementService.createMovement(movement).subscribe({
@@ -159,7 +181,15 @@ export class MovementComponent implements OnInit {
               console.log('✅ Herramienta asignada a trabajador');
               this.loadData();
             },
-            error: (error) => console.error('❌ Error asignando:', error)
+            error: (error) => {
+              console.error('❌ Error asignando:', error);
+              let errorMessage = 'Error al asignar la herramienta al trabajador';
+              if (error.error?.error) {
+                errorMessage = error.error.error;
+              }
+              alert(errorMessage);
+              this.loadData(); // Recargar datos aunque haya error
+            }
           });
         } 
         // Si vuelve al almacén, liberar asignación
@@ -193,8 +223,28 @@ export class MovementComponent implements OnInit {
   }
 
   selectWorker(worker: Worker) {
-    this.selectedWorker = worker;
-    console.log('👤 Trabajador seleccionado:', worker.name);
+    // Verificar si el trabajador ya tiene una herramienta activa
+    this.movementService.getWorkerActiveTool(worker.id).subscribe({
+      next: (response) => {
+        if (response.activeTool) {
+          const activeTool = response.activeTool;
+          const message = `${worker.name} ya tiene asignada la herramienta "${activeTool.tool_name}" en ${activeTool.building_name}.\n\n¿Deseas continuar de todas formas? El trabajador deberá devolver su herramienta actual primero.`;
+          
+          if (confirm(message)) {
+            this.selectedWorker = worker;
+            console.log('👤 Trabajador seleccionado (con herramienta activa):', worker.name, 'Herramienta actual:', activeTool.tool_name);
+          }
+        } else {
+          this.selectedWorker = worker;
+          console.log('👤 Trabajador seleccionado:', worker.name);
+        }
+      },
+      error: (error) => {
+        console.error('Error verificando herramienta activa:', error);
+        // En caso de error, permitir la selección
+        this.selectedWorker = worker;
+      }
+    });
   }
 
   confirmWorkerAssignment() {
@@ -228,5 +278,17 @@ export class MovementComponent implements OnInit {
     const almacen = this.buildings.filter(b => this.isAlmacen(b));
     const others = this.buildings.filter(b => !this.isAlmacen(b));
     return [...almacen, ...others];
+  }
+
+  getWorkerActiveToolInfo(workerId: number): string | null {
+    const activeTool = this.workerActiveTools.get(workerId);
+    if (activeTool) {
+      return `${activeTool.tool_name} en ${activeTool.building_name}`;
+    }
+    return null;
+  }
+
+  hasActiveTool(workerId: number): boolean {
+    return this.workerActiveTools.has(workerId);
   }
 }

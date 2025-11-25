@@ -11,16 +11,47 @@
       </div>
 
       <!-- Menu Items -->
-      <div class="flex space-x-1">
-        <a 
-          *ngFor="let item of menuItems" 
-          [routerLink]="item.path" 
-          routerLinkActive="bg-white text-blue-600 shadow-md" 
+      <div class="flex items-center space-x-1" *ngIf="isAuth(); else publicLinks">
+        <a
+          *ngFor="let item of menuItems"
+          [routerLink]="item.path"
+          routerLinkActive="bg-white text-blue-600 shadow-md"
           class="flex items-center space-x-2 px-4 py-2 rounded-lg transition-all text-blue-100 hover:bg-blue-700">
           <span class="text-lg">{{ item.icon }}</span>
           <span class="text-sm font-medium">{{ item.label }}</span>
         </a>
+        <!-- User dropdown -->
+        <div class="relative user-dropdown">
+          <button (click)="toggleDropdown()" class="flex items-center space-x-2 px-4 py-2 rounded-lg bg-white/10 hover:bg-white/20 transition">
+            <div class="w-8 h-8 rounded-full bg-gradient-to-tr from-blue-300 to-blue-600 flex items-center justify-center text-sm font-bold">
+              {{ (userName || 'U').charAt(0) }}
+            </div>
+            <div class="text-left hidden sm:block">
+              <p class="text-xs leading-tight text-blue-100">Sesión</p>
+              <p class="text-sm font-semibold truncate max-w-[120px]">{{ userName || 'Usuario' }}</p>
+            </div>
+            <span class="text-xs">▼</span>
+          </button>
+          <div *ngIf="dropdownOpen" class="absolute right-0 mt-2 w-56 bg-white text-gray-700 rounded-lg shadow-lg ring-1 ring-black/5 z-50">
+            <div class="px-4 py-3 border-b text-sm">
+              <p class="font-semibold">{{ userName }}</p>
+              <p class="text-xs text-gray-500">{{ auth.currentUser()?.email }}</p>
+            </div>
+            <button routerLink="/profile" class="w-full text-left px-4 py-2 hover:bg-gray-100 text-sm flex items-center space-x-2">
+              <span>📝</span><span>Editar Perfil</span>
+            </button>
+            <button (click)="logout()" class="w-full text-left px-4 py-2 hover:bg-red-50 text-sm flex items-center space-x-2 text-red-600">
+              <span>🚪</span><span>{{ loggingOut ? 'Cerrando...' : 'Salir' }}</span>
+            </button>
+          </div>
+        </div>
       </div>
+      <ng-template #publicLinks>
+        <div class="flex space-x-2">
+          <a routerLink="/login" class="px-4 py-2 rounded-lg bg-blue-500 hover:bg-blue-600 transition text-sm font-medium">Login</a>
+          <a routerLink="/register" class="px-4 py-2 rounded-lg bg-white text-blue-700 border border-blue-300 hover:bg-blue-50 transition text-sm font-medium">Registro</a>
+        </div>
+      </ng-template>
     </div>
   </div>
 </nav>

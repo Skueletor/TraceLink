@@ -7,5 +7,7 @@ router.post('/', movementController.createMovement);
 router.post('/assign', movementController.assignTool);
 router.post('/transfer', movementController.transferTool);
 router.post('/return', movementController.returnTool);
+router.get('/worker/:workerId/active-tool', movementController.getWorkerActiveTool);
+router.get('/worker/:workerId/has-active-tool', movementController.checkWorkerHasActiveTool);
 
 module.exports = router;

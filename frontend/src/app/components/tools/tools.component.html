@@ -76,23 +76,36 @@
 
     <div class="space-y-4">
       <div>
-        <label class="block text-sm font-semibold text-gray-700 mb-1">Nombre</label>
+        <label class="block text-sm font-semibold text-gray-700 mb-1">
+          Nombre <span class="text-red-500">*</span>
+        </label>
         <input type="text" [(ngModel)]="currentTool.name" 
+               [class.border-red-500]="!currentTool.name"
                class="w-full px-4 py-2 border-2 border-gray-300 rounded-lg focus:border-blue-500 focus:outline-none"
-               placeholder="Ej: Taladro Industrial">
+               placeholder="Ej: Taladro Industrial"
+               required>
       </div>
 
       <div>
-        <label class="block text-sm font-semibold text-gray-700 mb-1">Código</label>
+        <label class="block text-sm font-semibold text-gray-700 mb-1">
+          Código <span class="text-red-500">*</span>
+        </label>
         <input type="text" [(ngModel)]="currentTool.code" 
+               [class.border-red-500]="!currentTool.code"
                class="w-full px-4 py-2 border-2 border-gray-300 rounded-lg focus:border-blue-500 focus:outline-none"
-               placeholder="Ej: TL-001">
+               placeholder="Ej: TL-001"
+               required>
+        <p class="text-xs text-gray-500 mt-1">Código único para identificar la herramienta</p>
       </div>
 
       <div>
-        <label class="block text-sm font-semibold text-gray-700 mb-1">Categoría</label>
+        <label class="block text-sm font-semibold text-gray-700 mb-1">
+          Categoría <span class="text-red-500">*</span>
+        </label>
         <select [(ngModel)]="currentTool.category" 
-                class="w-full px-4 py-2 border-2 border-gray-300 rounded-lg focus:border-blue-500 focus:outline-none">
+                [class.border-red-500]="!currentTool.category"
+                class="w-full px-4 py-2 border-2 border-gray-300 rounded-lg focus:border-blue-500 focus:outline-none"
+                required>
           <option value="">Seleccionar categoría</option>
           <option value="Perforación">Perforación</option>
           <option value="Corte">Corte</option>
@@ -100,20 +113,35 @@
           <option value="Medición">Medición</option>
           <option value="Soldadura">Soldadura</option>
           <option value="Pintura">Pintura</option>
+          <option value="Limpieza">Limpieza</option>
+          <option value="Construcción">Construcción</option>
         </select>
       </div>
 
       <div>
-        <label class="block text-sm font-semibold text-gray-700 mb-1">Tiempo Máximo</label>
+        <label class="block text-sm font-semibold text-gray-700 mb-1">
+          Tiempo Máximo de Préstamo <span class="text-red-500">*</span>
+        </label>
         <select [(ngModel)]="currentTool.max_time" 
-                class="w-full px-4 py-2 border-2 border-gray-300 rounded-lg focus:border-blue-500 focus:outline-none">
+                [class.border-red-500]="!currentTool.max_time"
+                class="w-full px-4 py-2 border-2 border-gray-300 rounded-lg focus:border-blue-500 focus:outline-none"
+                required>
           <option value="">Seleccionar tiempo</option>
+          <option value="1 hora">1 hora</option>
           <option value="2 horas">2 horas</option>
           <option value="4 horas">4 horas</option>
           <option value="6 horas">6 horas</option>
           <option value="8 horas">8 horas</option>
+          <option value="12 horas">12 horas</option>
           <option value="24 horas">24 horas</option>
+          <option value="48 horas">48 horas</option>
         </select>
+      </div>
+
+      <div class="bg-blue-50 border border-blue-200 rounded-lg p-3">
+        <p class="text-xs text-blue-700">
+          <strong>Nota:</strong> La herramienta se asignará automáticamente al almacén una vez creada y estará disponible para su uso.
+        </p>
       </div>
     </div>
 
@@ -123,8 +151,13 @@
         Cancelar
       </button>
       <button (click)="saveTool()"
-              class="flex-1 px-4 py-3 bg-blue-600 text-white rounded-lg font-semibold hover:bg-blue-700 transition-colors">
-        {{ isEditMode ? 'Actualizar' : 'Crear' }}
+              [disabled]="!isFormValid()"
+              [class.bg-blue-600]="isFormValid()"
+              [class.hover:bg-blue-700]="isFormValid()"
+              [class.bg-gray-400]="!isFormValid()"
+              [class.cursor-not-allowed]="!isFormValid()"
+              class="flex-1 px-4 py-3 text-white rounded-lg font-semibold transition-colors">
+        {{ isEditMode ? 'Actualizar' : 'Crear' }} Herramienta
       </button>
     </div>
   </div>

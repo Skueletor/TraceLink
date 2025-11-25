@@ -25,19 +25,39 @@ class Tool {
   }
 
   static async create(name, code, category, maxTime) {
-    const result = await pool.query(
-      'INSERT INTO tools (name, code, category, max_time) VALUES ($1, $2, $3, $4) RETURNING *',
-      [name, code, category, maxTime]
-    );
-    return result.rows[0];
+    try {
+      const result = await pool.query(
+        'INSERT INTO tools (name, code, category, max_time, status) VALUES ($1, $2, $3, $4, $5) RETURNING *',
+        [name, code, category, maxTime, 'available']
+      );
+      return result.rows[0];
+    } catch (error) {
+      console.error('Error en Tool.create:', error);
+      throw error;
+    }
   }
 
   static async update(id, name, code, category, maxTime) {
-    const result = await pool.query(
-      'UPDATE tools SET name = $1, code = $2, category = $3, max_time = $4 WHERE id = $5 RETURNING *',
-      [name, code, category, maxTime, id]
-    );
-    return result.rows[0];
+    try {
+      // Validar que max_time no sea null o undefined
+      if (!maxTime) {
+        throw new Error('max_time es requerido y no puede ser null');
+      }
+      
+      const result = await pool.query(
+        'UPDATE tools SET name = $1, code = $2, category = $3, max_time = $4 WHERE id = $5 RETURNING *',
+        [name, code, category, maxTime, id]
+      );
+      
+      if (result.rows.length === 0) {
+        throw new Error('Herramienta no encontrada');
+      }
+      
+      return result.rows[0];
+    } catch (error) {
+      console.error('Error en Tool.update:', error);
+      throw error;
+    }
   }
 
   static async delete(id) {

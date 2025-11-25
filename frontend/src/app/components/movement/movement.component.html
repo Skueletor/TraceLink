@@ -88,30 +88,50 @@
       <p class="text-xs text-blue-600 mt-1">
         Selecciona el trabajador que retirará esta herramienta del almacén
       </p>
+      <div class="bg-amber-50 border border-amber-200 rounded-lg p-3 mt-2">
+        <p class="text-xs text-amber-800 flex items-center">
+          <span class="mr-1">⚠️</span>
+          <strong>Nota:</strong> Los trabajadores con ⚠️ ya tienen una herramienta asignada. Deberán devolverla antes de tomar otra.
+        </p>
+      </div>
     </div>
 
     <div class="grid grid-cols-1 md:grid-cols-2 gap-3 mb-6">
       <div *ngFor="let worker of workers"
            (click)="selectWorker(worker)"
-           [class.border-blue-500]="selectedWorker?.id === worker.id"
-           [class.bg-blue-50]="selectedWorker?.id === worker.id"
+           [class.border-blue-500]="selectedWorker?.id === worker.id && !workerActiveTools.has(worker.id)"
+           [class.bg-blue-50]="selectedWorker?.id === worker.id && !workerActiveTools.has(worker.id)"
            [class.shadow-md]="selectedWorker?.id === worker.id"
+           [class.border-amber-500]="workerActiveTools.has(worker.id)"
+           [class.bg-amber-50]="workerActiveTools.has(worker.id)"
+           [class.opacity-75]="workerActiveTools.has(worker.id)"
            class="border-2 rounded-lg p-4 cursor-pointer transition-all border-gray-200 hover:border-blue-300 hover:shadow">
         <div class="flex items-center justify-between">
           <div class="flex items-center">
-            <div class="bg-blue-100 p-2 rounded-full mr-3">
+            <div [class.bg-amber-100]="workerActiveTools.has(worker.id)" 
+                 [class.bg-blue-100]="!workerActiveTools.has(worker.id)" 
+                 class="p-2 rounded-full mr-3">
               <span class="text-2xl">👤</span>
             </div>
             <div>
               <p class="font-semibold text-gray-800">{{ worker.name }}</p>
               <p class="text-xs text-gray-500">{{ worker.code }}</p>
+              <p *ngIf="workerActiveTools.has(worker.id)" class="text-xs text-amber-700 font-medium">
+                🔧 {{ workerActiveTools.get(worker.id)?.tool_name }} en {{ workerActiveTools.get(worker.id)?.building_name }}
+              </p>
             </div>
           </div>
-          <span *ngIf="selectedWorker?.id === worker.id" class="text-blue-600 text-2xl">✅</span>
+          <div>
+            <span *ngIf="selectedWorker?.id === worker.id" class="text-blue-600 text-2xl block">✅</span>
+            <span *ngIf="workerActiveTools.has(worker.id)" class="text-amber-600 text-lg block">⚠️</span>
+          </div>
         </div>
         <div class="mt-2 flex gap-2">
           <span class="text-xs bg-gray-100 px-2 py-1 rounded">{{ worker.role }}</span>
           <span class="text-xs bg-gray-100 px-2 py-1 rounded">{{ worker.area }}</span>
+          <span *ngIf="workerActiveTools.has(worker.id)" class="text-xs bg-amber-100 text-amber-800 px-2 py-1 rounded">
+            Herramienta activa
+          </span>
         </div>
       </div>
     </div>

@@ -26,7 +26,9 @@ exports.createMovement = async (req, res) => {
       });
     }
 
-    const movement = await Movement.create(toolId, workerId, fromBuildingId, toBuildingId, movementType, description);
+    // Incluir el ID del usuario autenticado
+    const userId = req.user?.id || null;
+    const movement = await Movement.create(toolId, workerId, fromBuildingId, toBuildingId, movementType, description, userId);
     res.status(201).json(movement);
   } catch (error) {
     res.status(500).json({ error: error.message });
@@ -61,6 +63,26 @@ exports.returnTool = async (req, res) => {
     const { toolId } = req.body;
     await Movement.returnTool(toolId);
     res.json({ message: 'Herramienta devuelta exitosamente' });
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+};
+
+exports.getWorkerActiveTool = async (req, res) => {
+  try {
+    const { workerId } = req.params;
+    const activeTool = await Movement.getWorkerActiveTool(workerId);
+    res.json({ activeTool });
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+};
+
+exports.checkWorkerHasActiveTool = async (req, res) => {
+  try {
+    const { workerId } = req.params;
+    const hasActiveTool = await Movement.checkWorkerHasActiveTool(workerId);
+    res.json({ hasActiveTool });
   } catch (error) {
     res.status(500).json({ error: error.message });
   }

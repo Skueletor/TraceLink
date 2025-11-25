@@ -43,4 +43,12 @@ export class MovementService {
   returnTool(toolId: number): Observable<any> {
     return this.api.post('/movements/return', { toolId });
   }
+
+  getWorkerActiveTool(workerId: number): Observable<{activeTool: any}> {
+    return this.api.get<{activeTool: any}>(`/movements/worker/${workerId}/active-tool`);
+  }
+
+  checkWorkerHasActiveTool(workerId: number): Observable<{hasActiveTool: boolean}> {
+    return this.api.get<{hasActiveTool: boolean}>(`/movements/worker/${workerId}/has-active-tool`);
+  }
 }

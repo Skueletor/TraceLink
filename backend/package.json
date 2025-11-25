@@ -4,9 +4,12 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-  "start": "node server.js",
-  "dev": "nodemon server.js"
-},
+    "start": "node server.js",
+    "dev": "nodemon server.js",
+    "migrate": "node migrations/run-migrations.js",
+    "migrate:reset": "node migrations/run-migrations.js --reset",
+    "migrate:status": "node migrations/run-migrations.js --status"
+  },
   "keywords": [],
   "author": "",
   "license": "ISC",

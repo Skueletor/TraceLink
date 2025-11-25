@@ -6,6 +6,9 @@ const buildingRoutes = require('./routes/buildingRoutes');
 const workerRoutes = require('./routes/workerRoutes');
 const toolRoutes = require('./routes/toolRoutes');
 const movementRoutes = require('./routes/movementRoutes');
+const authRoutes = require('./routes/authRoutes');
+const loanMonitoringRoutes = require('./routes/loanMonitoringRoutes');
+const { authenticate, adminOnly } = require('./middleware/authMiddleware');
 
 const app = express();
 
@@ -15,10 +18,15 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
 // Rutas
-app.use('/api/buildings', buildingRoutes);
-app.use('/api/workers', workerRoutes);
-app.use('/api/tools', toolRoutes);
-app.use('/api/movements', movementRoutes);
+// Auth public
+app.use('/api/auth', authRoutes);
+
+// Protected (admin only por ahora)
+app.use('/api/buildings', authenticate, adminOnly, buildingRoutes);
+app.use('/api/workers', authenticate, adminOnly, workerRoutes);
+app.use('/api/tools', authenticate, adminOnly, toolRoutes);
+app.use('/api/movements', authenticate, adminOnly, movementRoutes);
+app.use('/api/monitoring', loanMonitoringRoutes);
 
 // Ruta raíz
 app.get('/', (req, res) => {
