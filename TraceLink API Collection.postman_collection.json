@@ -1,0 +1,1177 @@
+{
+	"info": {
+		"_postman_id": "3aa916d0-9297-479c-a982-48b226377b89",
+		"name": "TraceLink API Collection",
+		"description": "Colección completa de API para el sistema TraceLink - Sistema de gestión y monitoreo de herramientas en tiempo real",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "40668228"
+	},
+	"item": [
+		{
+			"name": "🔐 Authentication",
+			"item": [
+				{
+					"name": "Login",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"if (responseCode.code === 200) {",
+									"    const response = pm.response.json();",
+									"    pm.environment.set('jwt_token', response.token);",
+									"    pm.environment.set('refresh_token', response.refreshToken);",
+									"    pm.environment.set('user_id', response.user.id);",
+									"    pm.environment.set('user_role', response.user.role);",
+									"    console.log('✅ Token guardado:', response.token.substring(0, 20) + '...');",
+									"}"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"email\": \"admin@example.com\",\n  \"password\": \"admin123\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/auth/login",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"auth",
+								"login"
+							]
+						},
+						"description": "Autenticar usuario y obtener JWT token + refresh token"
+					},
+					"response": [
+						{
+							"name": "Login Exitoso",
+							"originalRequest": {
+								"method": "POST",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n  \"email\": \"admin@example.com\",\n  \"password\": \"admin123\"\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{base_url}}/api/auth/login",
+									"host": [
+										"{{base_url}}"
+									],
+									"path": [
+										"api",
+										"auth",
+										"login"
+									]
+								}
+							},
+							"status": "OK",
+							"code": 200,
+							"_postman_previewlanguage": "json",
+							"header": [],
+							"cookie": [],
+							"body": "{\n  \"token\": \"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...\",\n  \"refreshToken\": \"abc123def456...\",\n  \"user\": {\n    \"id\": 1,\n    \"name\": \"Admin User\",\n    \"email\": \"admin@example.com\",\n    \"role\": \"admin\"\n  },\n  \"refreshExpiresAt\": \"2024-12-02T10:00:00.000Z\"\n}"
+						}
+					]
+				},
+				{
+					"name": "Register User",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							},
+							{
+								"key": "Authorization",
+								"value": "Bearer {{jwt_token}}"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"name\": \"Nuevo Usuario\",\n  \"email\": \"usuario@example.com\",\n  \"password\": \"password123\",\n  \"role\": \"user\",\n  \"workerId\": 5\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/auth/register",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"auth",
+								"register"
+							]
+						},
+						"description": "Registrar nuevo usuario (solo administradores)"
+					},
+					"response": []
+				},
+				{
+					"name": "Get Profile",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{jwt_token}}"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/api/auth/profile",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"auth",
+								"profile"
+							]
+						},
+						"description": "Obtener perfil del usuario autenticado"
+					},
+					"response": []
+				},
+				{
+					"name": "Refresh Token",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"if (responseCode.code === 200) {",
+									"    const response = pm.response.json();",
+									"    pm.environment.set('jwt_token', response.token);",
+									"    console.log('✅ Token refrescado');",
+									"}"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"refreshToken\": \"{{refresh_token}}\",\n  \"userId\": {{user_id}}\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/auth/refresh",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"auth",
+								"refresh"
+							]
+						},
+						"description": "Refrescar JWT token usando refresh token"
+					},
+					"response": []
+				},
+				{
+					"name": "Update Profile",
+					"request": {
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							},
+							{
+								"key": "Authorization",
+								"value": "Bearer {{jwt_token}}"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"name\": \"Nuevo Nombre\",\n  \"currentPassword\": \"oldpassword123\",\n  \"newPassword\": \"newpassword123\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/auth/profile",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"auth",
+								"profile"
+							]
+						},
+						"description": "Actualizar perfil y/o contraseña del usuario"
+					},
+					"response": []
+				},
+				{
+					"name": "Logout",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"refreshToken\": \"{{refresh_token}}\",\n  \"userId\": {{user_id}}\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/auth/logout",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"auth",
+								"logout"
+							]
+						},
+						"description": "Cerrar sesión e invalidar refresh token"
+					},
+					"response": []
+				}
+			],
+			"description": "Endpoints de autenticación y gestión de usuarios"
+		},
+		{
+			"name": "🏢 Buildings",
+			"item": [
+				{
+					"name": "Get All Buildings",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{jwt_token}}"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/api/buildings",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"buildings"
+							]
+						},
+						"description": "Obtener lista de todos los edificios"
+					},
+					"response": []
+				},
+				{
+					"name": "Get Building by ID",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{jwt_token}}"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/api/buildings/1",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"buildings",
+								"1"
+							]
+						},
+						"description": "Obtener edificio específico por ID"
+					},
+					"response": []
+				}
+			],
+			"description": "Gestión de edificios del sistema"
+		},
+		{
+			"name": "👷 Workers",
+			"item": [
+				{
+					"name": "Get All Workers",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{jwt_token}}"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/api/workers",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"workers"
+							]
+						},
+						"description": "Obtener lista completa de trabajadores"
+					},
+					"response": []
+				},
+				{
+					"name": "Get Worker by ID",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{jwt_token}}"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/api/workers/1",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"workers",
+								"1"
+							]
+						},
+						"description": "Obtener trabajador específico por ID"
+					},
+					"response": []
+				},
+				{
+					"name": "Create Worker",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							},
+							{
+								"key": "Authorization",
+								"value": "Bearer {{jwt_token}}"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"name\": \"María González\",\n  \"code\": \"WRK002\",\n  \"role\": \"Supervisora\",\n  \"area\": \"Producción\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/workers",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"workers"
+							]
+						},
+						"description": "Crear nuevo trabajador"
+					},
+					"response": []
+				},
+				{
+					"name": "Update Worker",
+					"request": {
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							},
+							{
+								"key": "Authorization",
+								"value": "Bearer {{jwt_token}}"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"name\": \"María González López\",\n  \"code\": \"WRK002\",\n  \"role\": \"Supervisora Senior\",\n  \"area\": \"Producción\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/workers/2",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"workers",
+								"2"
+							]
+						},
+						"description": "Actualizar información de trabajador existente"
+					},
+					"response": []
+				},
+				{
+					"name": "Delete Worker",
+					"request": {
+						"method": "DELETE",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{jwt_token}}"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/api/workers/2",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"workers",
+								"2"
+							]
+						},
+						"description": "Eliminar trabajador del sistema"
+					},
+					"response": []
+				}
+			],
+			"description": "Gestión completa de trabajadores"
+		},
+		{
+			"name": "🔧 Tools",
+			"item": [
+				{
+					"name": "Get All Tools",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{jwt_token}}"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/api/tools",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"tools"
+							]
+						},
+						"description": "Obtener inventario completo de herramientas"
+					},
+					"response": []
+				},
+				{
+					"name": "Get Tool by ID",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{jwt_token}}"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/api/tools/1",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"tools",
+								"1"
+							]
+						},
+						"description": "Obtener herramienta específica por ID"
+					},
+					"response": []
+				},
+				{
+					"name": "Create Tool",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							},
+							{
+								"key": "Authorization",
+								"value": "Bearer {{jwt_token}}"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"name\": \"Martillo Neumático\",\n  \"code\": \"TL002\",\n  \"category\": \"Herramientas Neumáticas\",\n  \"max_time\": \"3h\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/tools",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"tools"
+							]
+						},
+						"description": "Registrar nueva herramienta en el inventario"
+					},
+					"response": []
+				},
+				{
+					"name": "Update Tool",
+					"request": {
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							},
+							{
+								"key": "Authorization",
+								"value": "Bearer {{jwt_token}}"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"name\": \"Martillo Neumático Industrial\",\n  \"code\": \"TL002\",\n  \"category\": \"Herramientas Neumáticas\",\n  \"max_time\": \"4h\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/tools/2",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"tools",
+								"2"
+							]
+						},
+						"description": "Actualizar información de herramienta existente"
+					},
+					"response": []
+				},
+				{
+					"name": "Delete Tool",
+					"request": {
+						"method": "DELETE",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{jwt_token}}"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/api/tools/2",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"tools",
+								"2"
+							]
+						},
+						"description": "Eliminar herramienta del inventario"
+					},
+					"response": []
+				}
+			],
+			"description": "Gestión completa del inventario de herramientas"
+		},
+		{
+			"name": "📦 Movements",
+			"item": [
+				{
+					"name": "Get All Movements",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{jwt_token}}"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/api/movements?limit=50",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"movements"
+							],
+							"query": [
+								{
+									"key": "limit",
+									"value": "50"
+								}
+							]
+						},
+						"description": "Obtener historial de movimientos de herramientas"
+					},
+					"response": []
+				},
+				{
+					"name": "Create Movement",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							},
+							{
+								"key": "Authorization",
+								"value": "Bearer {{jwt_token}}"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"toolId\": 1,\n  \"workerId\": 2,\n  \"fromBuildingId\": 3,\n  \"toBuildingId\": 1,\n  \"movementType\": \"assignment\",\n  \"description\": \"Asignación manual de herramienta\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/movements",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"movements"
+							]
+						},
+						"description": "Registrar nuevo movimiento de herramienta"
+					},
+					"response": []
+				},
+				{
+					"name": "Assign Tool",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							},
+							{
+								"key": "Authorization",
+								"value": "Bearer {{jwt_token}}"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"toolId\": 1,\n  \"workerId\": 2,\n  \"buildingId\": 1\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/movements/assign",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"movements",
+								"assign"
+							]
+						},
+						"description": "Asignar herramienta específica a un trabajador"
+					},
+					"response": []
+				},
+				{
+					"name": "Transfer Tool",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							},
+							{
+								"key": "Authorization",
+								"value": "Bearer {{jwt_token}}"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"toolId\": 1,\n  \"buildingId\": 2\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/movements/transfer",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"movements",
+								"transfer"
+							]
+						},
+						"description": "Transferir herramienta entre edificios"
+					},
+					"response": []
+				},
+				{
+					"name": "Return Tool",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							},
+							{
+								"key": "Authorization",
+								"value": "Bearer {{jwt_token}}"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"toolId\": 1\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/movements/return",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"movements",
+								"return"
+							]
+						},
+						"description": "Procesar devolución de herramienta"
+					},
+					"response": []
+				},
+				{
+					"name": "Get Worker Active Tool",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{jwt_token}}"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/api/movements/worker/1/active-tool",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"movements",
+								"worker",
+								"1",
+								"active-tool"
+							]
+						},
+						"description": "Obtener herramienta activa asignada a un trabajador"
+					},
+					"response": []
+				},
+				{
+					"name": "Check Worker Has Tool",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{jwt_token}}"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/api/movements/worker/1/has-tool",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"movements",
+								"worker",
+								"1",
+								"has-tool"
+							]
+						},
+						"description": "Verificar si trabajador tiene herramienta activa"
+					},
+					"response": []
+				}
+			],
+			"description": "Gestión completa de movimientos y asignaciones de herramientas"
+		},
+		{
+			"name": "📊 Loan Monitoring System",
+			"item": [
+				{
+					"name": "Dashboard Complete",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{jwt_token}}"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/api/monitoring/dashboard",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"monitoring",
+								"dashboard"
+							]
+						},
+						"description": "Dashboard completo con estadísticas, préstamos activos y alertas en tiempo real"
+					},
+					"response": []
+				},
+				{
+					"name": "Get Active Loans",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{jwt_token}}"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/api/monitoring/loans",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"monitoring",
+								"loans"
+							]
+						},
+						"description": "Obtener todos los préstamos activos con información de tiempo"
+					},
+					"response": []
+				},
+				{
+					"name": "Get Loans by Status",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{jwt_token}}"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/api/monitoring/loans?status=overdue",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"monitoring",
+								"loans"
+							],
+							"query": [
+								{
+									"key": "status",
+									"value": "overdue",
+									"description": "Filtrar por: active, warning, overdue"
+								}
+							]
+						},
+						"description": "Filtrar préstamos por estado (active, warning, overdue)"
+					},
+					"response": []
+				},
+				{
+					"name": "Get Loans by Worker",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{jwt_token}}"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/api/monitoring/loans/worker/1",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"monitoring",
+								"loans",
+								"worker",
+								"1"
+							]
+						},
+						"description": "Obtener préstamos activos de un trabajador específico"
+					},
+					"response": []
+				},
+				{
+					"name": "Get Loan Details",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{jwt_token}}"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/api/monitoring/loans/assignment/1",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"monitoring",
+								"loans",
+								"assignment",
+								"1"
+							]
+						},
+						"description": "Obtener detalles completos de un préstamo específico"
+					},
+					"response": []
+				},
+				{
+					"name": "Get Upcoming Due Loans",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{jwt_token}}"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/api/monitoring/loans/upcoming-due?minutes=30",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"monitoring",
+								"loans",
+								"upcoming-due"
+							],
+							"query": [
+								{
+									"key": "minutes",
+									"value": "30",
+									"description": "Ventana de tiempo en minutos (default: 30)"
+								}
+							]
+						},
+						"description": "Obtener préstamos que vencen en los próximos X minutos"
+					},
+					"response": []
+				},
+				{
+					"name": "Get Active Alerts",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{jwt_token}}"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/api/monitoring/alerts",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"monitoring",
+								"alerts"
+							]
+						},
+						"description": "Obtener todas las alertas activas (no resueltas)"
+					},
+					"response": []
+				},
+				{
+					"name": "Get All Alerts (History)",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{jwt_token}}"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/api/monitoring/alerts/all?limit=50",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"monitoring",
+								"alerts",
+								"all"
+							],
+							"query": [
+								{
+									"key": "limit",
+									"value": "50",
+									"description": "Número máximo de alertas (default: 50)"
+								}
+							]
+						},
+						"description": "Obtener historial completo de alertas (incluye resueltas)"
+					},
+					"response": []
+				},
+				{
+					"name": "Generate Alerts",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{jwt_token}}"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/api/monitoring/alerts/generate",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"monitoring",
+								"alerts",
+								"generate"
+							]
+						},
+						"description": "Generar alertas automáticas para préstamos vencidos"
+					},
+					"response": []
+				},
+				{
+					"name": "Resolve Alert",
+					"request": {
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{jwt_token}}"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/api/monitoring/alerts/1/resolve",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"monitoring",
+								"alerts",
+								"1",
+								"resolve"
+							]
+						},
+						"description": "Marcar alerta como resuelta"
+					},
+					"response": []
+				},
+				{
+					"name": "Get System Stats",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{jwt_token}}"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/api/monitoring/stats",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"monitoring",
+								"stats"
+							]
+						},
+						"description": "Obtener estadísticas generales del sistema de monitoreo"
+					},
+					"response": []
+				}
+			],
+			"description": "Sistema completo de monitoreo de préstamos con alertas en tiempo real"
+		}
+	],
+	"event": [
+		{
+			"listen": "prerequest",
+			"script": {
+				"type": "text/javascript",
+				"exec": [
+					"// Auto-refresh token si está por expirar",
+					"const tokenExpiry = pm.environment.get('token_expiry');",
+					"if (tokenExpiry && new Date() > new Date(tokenExpiry - 300000)) {",
+					"    console.log('🔄 Token por expirar, refrescando automáticamente...');",
+					"    // Aquí podrías implementar auto-refresh",
+					"}"
+				]
+			}
+		},
+		{
+			"listen": "test",
+			"script": {
+				"type": "text/javascript",
+				"exec": [
+					"// Manejo global de errores",
+					"if (responseCode.code >= 400) {",
+					"    console.log('❌ Error:', responseCode.code, pm.response.json());",
+					"    if (responseCode.code === 401) {",
+					"        console.log('🔐 Token expirado o inválido - considera hacer refresh');",
+					"    }",
+					"}"
+				]
+			}
+		}
+	],
+	"variable": [
+		{
+			"key": "base_url",
+			"value": "http://localhost:3000",
+			"type": "string"
+		}
+	]
+}
